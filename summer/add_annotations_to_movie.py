@@ -9,9 +9,9 @@ def get_annotations(ann_dir, type):
     try:
         data = mat[key_name]
     except:
-        print ('Error: ', annotation_file)
-        return None
+        print ('Error: missing annotation file for ', annotation_file)
     return data
+
 
 def add_relevant_annotation(all_annotations, count_annotation_frames):
     text = ''

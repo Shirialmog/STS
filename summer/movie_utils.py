@@ -1,5 +1,5 @@
 import cv2
-from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
+from moviepy.editor import VideoFileClip
 
 def cut_movie(movie_path, new_path, start_frame, end_frame):
     cap = cv2.VideoCapture(movie_path)
