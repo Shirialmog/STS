@@ -51,15 +51,10 @@ def remove_useless_data(data):
     Clean the data by removing voxels with NaN values, inf values, or constant values.
     """
 
-    # cleaned_data =  data[:, np.std(data, axis=0) > 0]
-    # cleaned_data = cleaned_data[:,~np.isnan(cleaned_data).any(axis=0)]
-    # cleaned_data = cleaned_data[:,~np.isinf(cleaned_data).any(axis=0)]
-    nan_mask = np.any(np.isnan(data), axis=-1)
-    inf_mask = np.any(np.isinf(data), axis=-1)
-    constant_mask = np.any(np.std(data, axis=0) == 0, axis=-1)
-    mask = np.logical_or(nan_mask, inf_mask)
-    mask = np.logical_or(mask, constant_mask)
-    cleaned_data = data[~mask]
+    cleaned_data =  data[:, np.std(data, axis=0) > 0]
+    cleaned_data = cleaned_data[:,~np.isnan(cleaned_data).any(axis=0)]
+    cleaned_data = cleaned_data[:,~np.isinf(cleaned_data).any(axis=0)]
+
     return cleaned_data
 
 
