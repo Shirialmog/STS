@@ -10,6 +10,7 @@ import logging
 from voxelwise_encoding.utils import clean_image, save_group_nii, save_as_nii
 from models_config import models_config_dict
 
+
 def concat_features(features_list, single_features_dir):
     processed_annotations = []
     for item in features_list:
@@ -27,7 +28,7 @@ def main(data_path, annotations_path, mask_path, model, group_dir, original_data
     X = normalize(features, axis=0)
 
     r_nifti_group = np.zeros([num_subjects, original_data_shape[0], original_data_shape[1], original_data_shape[2]])
-    weight_nifti_group = np.zeros(
+    r_per_feature_nifti_group = np.zeros(
         [num_subjects, num_features, original_data_shape[0], original_data_shape[1], original_data_shape[2]])
 
     for subj in range(1, num_subjects + 1):
@@ -43,7 +44,7 @@ def main(data_path, annotations_path, mask_path, model, group_dir, original_data
             mask = None
         data_clean, masked_indices, original_data_shape, img_affine = clean_image(fmri_path, subj, mask,
                                                                                   args.results_dir)
-        data_clean = data_clean[:5469] # in case the data is a frame or a few frames longer..
+        data_clean = data_clean[:5469]  # in case the data is a frame or a few frames longer
         num_voxels = data_clean.shape[1]
         y = data_clean.copy()
 
@@ -68,7 +69,7 @@ def main(data_path, annotations_path, mask_path, model, group_dir, original_data
 
         # get weights ( r per feature)
         logging.info('Calculating weights')
-        weights = np.zeros([num_features, num_voxels])
+        r_per_feature = np.zeros([num_features, num_voxels])
         for i in range(num_features):
             feature_coef = ridge_coef.copy()
             # make all other features 0
@@ -79,20 +80,21 @@ def main(data_path, annotations_path, mask_path, model, group_dir, original_data
             y_pred = np.dot(X_test, feature_coef.T)
 
             for v in range(num_voxels):
-                weights[i, v] = np.corrcoef(y_test[:, v], y_pred[:, v])[0, 1]
+                r_per_feature[i, v] = np.corrcoef(y_test[:, v], y_pred[:, v])[0, 1]
 
-        # use masked indices to convert r_mean, weight_mean, and b_mean to 3D arrays
-        r_nifti = np.zeros((original_data_shape))
-        weight_nifti = np.zeros([num_features, original_data_shape[0], original_data_shape[1], original_data_shape[2]])
+        # we only ran the model on the masked indices, so we need to put the results back in the original shape
+        r_nifti = np.zeros(original_data_shape)
+        r_per_feature_nifti = np.zeros(
+            [num_features, original_data_shape[0], original_data_shape[1], original_data_shape[2]])
 
         r_nifti[masked_indices[0], masked_indices[1], masked_indices[2]] = r
-        weight_nifti[:, masked_indices[0], masked_indices[1], masked_indices[2]] = weights
-        save_as_nii(model, subj, r_nifti, weight_nifti, save_dir, feature_names, img_affine)
+        r_per_feature_nifti[:, masked_indices[0], masked_indices[1], masked_indices[2]] = r_per_feature
+        save_as_nii(model, subj, r_nifti, r_per_feature_nifti, save_dir, feature_names, img_affine)
 
         r_nifti_group[subj - 1, :, :, :] = r_nifti
-        weight_nifti_group[subj - 1, :, :, :, :] = weight_nifti
+        r_per_feature_nifti_group[subj - 1, :, :, :, :] = r_per_feature_nifti
     r_mean = np.mean(r_nifti_group, axis=0)
-    weight_mean = np.mean(weight_nifti_group, axis=0)
+    weight_mean = np.mean(r_per_feature_nifti_group, axis=0)
     save_group_nii(model, r_mean, weight_mean, group_dir, feature_names, img_affine)
 
 
@@ -102,7 +104,8 @@ if __name__ == '__main__':
     args.add_argument('--annotations_path', type=str)
     args.add_argument('--isc_mask_path', type=str, required=False)
     args.add_argument('--results_dir', type=str)
-    args.add_argument('--model', type=str, default='full', help='full, social, social_plus_llava, llava_features, llava_only_social')
+    args.add_argument('--model', type=str, default='full',
+                      help='full, social, social_plus_llava, llava_features, llava_only_social')
     args = args.parse_args()
 
     start_time = time.time()
@@ -113,9 +116,10 @@ if __name__ == '__main__':
 
     alphas = np.logspace(1, 4, 10)
     original_data_shape = [64, 76, 64]
-    num_subjects = 3
+    num_subjects = 9
 
-    main(args.fmri_data_path, args.annotations_path, args.isc_mask_path, model, group_dir, original_data_shape, num_subjects, alphas)
+    main(args.fmri_data_path, args.annotations_path, args.isc_mask_path, model, group_dir, original_data_shape,
+         num_subjects, alphas)
 
     duration = round((time.time() - start_time) / 60)
     print(f'duration: {duration} mins')

@@ -2,6 +2,7 @@ import nibabel as nib
 import numpy as np
 from nilearn import plotting
 
+
 def plot_voxelwise_encoding_results_on_surface(results_file_path: str, model: str, feature: str):
     nii = nib.load(results_file_path)
     data = nii.get_fdata()

@@ -3,6 +3,7 @@ import numpy as np
 import nibabel as nib
 from nilearn import image
 
+
 def clean_image(fmri_path, subj, mask, results_dir):
     """
     Read fMRI data, mask the image with intersubject correlation map (r>0.25),
@@ -24,7 +25,7 @@ def clean_image(fmri_path, subj, mask, results_dir):
         original_data, img_affine = load_fmri_data(fmri_path)
         original_data_shape = original_data.shape[:3]
         masked_data, mask_indices = apply_mask(original_data, mask)
-        #data_clean = remove_useless_data(masked_data)
+        # data_clean = remove_useless_data(masked_data)
         data_clean = masked_data
         data_clean = data_clean.T
         np.save(npy_path, data_clean)
@@ -59,7 +60,7 @@ def save_as_nii(model, subj, r_mean, weight_mean, savedir, name_feature, img_aff
     Save data to NIfTI format.
     """
     # Update data_clean.samples with r_mean and save to NIfTI
-    save_nifti(r_mean,  os.path.join(savedir, f"{model}_r_sub{subj}.nii"), affine=img_affine)
+    save_nifti(r_mean, os.path.join(savedir, f"{model}_r_sub{subj}.nii"), affine=img_affine)
 
     # Save each feature's weights to a separate NIfTI file
     for i, feature_name in enumerate(name_feature):
@@ -74,7 +75,7 @@ def save_group_nii(model, r_mean, weight_mean, savedir, name_feature, img_affine
     Save data to NIfTI format.
     """
     # Update data_clean.samples with r_mean and save to NIfTI
-    save_nifti(r_mean,  os.path.join(savedir, f"{model}_r.nii"), affine=img_affine)
+    save_nifti(r_mean, os.path.join(savedir, f"{model}_r.nii"), affine=img_affine)
 
     # Save each feature's weights to a separate NIfTI file
     for i, feature_name in enumerate(name_feature):
@@ -82,6 +83,7 @@ def save_group_nii(model, r_mean, weight_mean, savedir, name_feature, img_affine
         save_nifti(encoding_weights, os.path.join(savedir, f"{feature_name}.nii"), affine=img_affine)
 
     return
+
 
 def save_nifti(data, filename, affine=None):
     nifti_img = nib.Nifti1Image(data, affine)
