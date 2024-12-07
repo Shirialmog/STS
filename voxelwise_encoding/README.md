@@ -7,8 +7,9 @@ The script takes the following inputs:
 - results_dir: directory where the results will be saved.
 - model: refers to the collection of features that will be used for the encoding. See models_config.py for possible combinations, and add your own if needed.
 
- 
-<h2> Folder Hierarchy: </h2>
+
+<h2> Folder Hierarchy: </h2> 
+
 ```
 - fmri_data_path
     - sub1
@@ -27,7 +28,7 @@ The script takes the following inputs:
 ```
 
 <h2> Plotting Results on Surface </h2>
-![surface_plot_example](voxelwise_encoding/surface_plot_example.png)
+![surface_plot_example](./surface_plot_example.png)
 
 The script 'voxelwise_encoding_ridge.py' will save nibabel files with the encoding results. To plot the results, you can use the script 'plot_nii_as_surf.py'. This script will plot the results on the surface of the brain, and open in a browser. You can then right click the plot and save it as an html file.
 
