@@ -28,9 +28,8 @@ The script takes the following inputs:
 ```
 
 <h2> Plotting Results on Surface </h2>
-![surface_plot_example](https://github.com/Shirialmog/STS/blob/master/voxelwise_encoding/surface_plot_example.png?raw=true)
 
 The script 'voxelwise_encoding_ridge.py' will save nibabel files with the encoding results. To plot the results, you can use the script 'plot_nii_as_surf.py'. This script will plot the results on the surface of the brain, and open in a browser. You can then right click the plot and save it as an html file.
-
+See example - https://github.com/Shirialmog/STS/blob/master/voxelwise_encoding/surface_plot_example.png
 
 
